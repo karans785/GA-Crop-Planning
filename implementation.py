@@ -53,23 +53,6 @@ def fitness(member):
         fitness = fitness + ((data[i][0]/data[i][1])*member[i]*((data[i][2]-data[i][3])/data[i][3]));
     return fitness
 
-def run_ga():    
-    population, params = initialize()
-    
-    for i in range(1000):
-        fitness_list = []
-        avg_fitness = 0
-        for member in population:
-            mem_fitness = fitness(member, params)
-            fitness_list.append(mem_fitness)
-            avg_fitness = avg_fitness + mem_fitness
-        avg_fitness = avg_fitness/params.N
-        #mating_pool = selection(population)
-        
-        if np.random.rand()<params.crossover_rate:
-            #crossover(mating pool) 
-            print(0)
-
 def roulette_wheel_selection(avg_fitness,fitness_list):    
     probability=[]
     for i in fitness_list:
