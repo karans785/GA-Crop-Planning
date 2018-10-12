@@ -6,8 +6,13 @@ Created on Tue Oct  9 18:10:44 2018
 """
 import numpy as np
 import pandas as pd
+import copy
+
 area = int(input('Enter the area : '))
 cost = int(input('Enter the money you have : '))
+
+print("Crops List:-\n")
+print("1.Wheat\n2.Rice\n3.Sunflower\n")
 
 n = int(input('Enter the number of crops you have : '))
 crops = []
@@ -35,7 +40,6 @@ def cover():
     member = [0 for i in range(n)]
     while(not is_valid(member)):
         member = [np.random.randint(0,10) for i in range(n)]
-        
     return member
 
 def initialize():
@@ -53,24 +57,85 @@ def fitness(member):
         fitness = fitness + ((data[i][0]/data[i][1])*member[i]*((data[i][2]-data[i][3])/data[i][3]));
     return fitness
 
-def roulette_wheel_selection(avg_fitness,fitness_list):    
+def roulette_wheel_selection(avg_fitness,fitness_list,population):    
     probability=[]
+    x = len(fitness_list)
     for i in fitness_list:
         probability.append(i/avg_fitness)
+    cum_probab=[]
+    for i in range(x):
+        if i == 0:
+            cum_probab.append(probability[i])
+        else:
+            cum_probab.append(cum_probab[i-1]+probability[i])
+    new_pop=[]
+    for i in range(x):
+        rand = np.random.randint(0,100)
+        closest_diff_so_far = 10000
+        closest_j_so_far=-1
+        for j in range(x):   
+            if cum_probab[i]>rand:
+                diff = abs(cum_probab[i]-rand)
+                if diff < closest_diff_so_far  :
+                    closest_diff_so_far = diff    
+                    closest_j_so_far = j
+                if closest_j_so_far >-1:                   
+                    found = False
+                    for k in new_pop:
+                        if  k == population[j]:
+                            found=True    
+                    if not found:
+                        new_pop.append(population[j])                      
+    return new_pop
+
+def cross(p1,p2):
+    point1 = np.random.randint(0,n) 
+    point2 = np.random.randint(0,n)
+    p1[point1],p2[point2] = p2[point1],p1[point2]
+    return p1,p2
+
+def crossover(mating_pool):
+    new_pop=[]
+    for i in mating_pool:
+        new_pop.append(i)
+    temp_1 = np.random.randint(len(mating_pool))
+    temp_2 = np.random.randint(len(mating_pool))
     
-    
+    parent_1 = copy.deepcopy(mating_pool[temp_1])
+    parent_2 = copy.deepcopy(mating_pool[temp_2])
+    new1,new2 = cross(parent_1,parent_2) 
+    new_pop.append(new1)
+    new_pop.append(new2)
+    return new_pop
 def GA():
     population, params = initialize()
     print('Initial population is : ')
-    #for i in population:
-    #    print(i," -> ",fitness(i))
-    fitness_list=[]
-    for i in range(100):
-        for i in population:
-            mem_fitness = fitness(i)
-            fitness.append(mem_fitness)
+    ans=-100
+    ans_Chromosome=[]
+    for i in population:
+        print(i," -> ",fitness(i))
+    for i in range(200):
+        fitness_list=[]
+        avg_fitness=0
+        for j in population:
+            mem_fitness = fitness(j)
+            fitness_list.append(mem_fitness)
             avg_fitness = avg_fitness + mem_fitness
         avg_fitness = avg_fitness/params.N
-        parents = roulette_wheel_selection(avg_fitness,fitness_list)
-    selection(population,fitness)
-GA()
+        print(avg_fitness)
+        mating_pool = roulette_wheel_selection(avg_fitness,fitness_list,population)
+        #print("\nMating Pool : \n")
+        #for i in mating_pool :
+        #   print(i,"->",fitness(i))
+        population=crossover(mating_pool)
+        if i ==99:
+            p=0
+            for k in (fitness_list):
+                if k>ans:
+                    ans=k
+                    ans_Chromosome=population[p]
+                p=p+1
+    return ans,ans_Chromosome
+
+answer,ans_Chromosome=GA()    
+print("Answer is : ",ans_Chromosome," with fitness ",answer,".")
