@@ -159,6 +159,11 @@ def GA():
 answer,ans_Chromosome,avg_fitness_list=GA()    
 print("Answer is : ",ans_Chromosome," with fitness ",answer,".")
 
+
+print("The genetic algorithm suggests that you should plant  :- \n")
+for i in range(n):
+    print(crops[i]," in ",ans_Chromosome[i]," hectares of your farm.")
+    
 #Plot the results
 import matplotlib.pyplot as plt
 x = np.arange(0,100,1)
