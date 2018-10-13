@@ -8,9 +8,9 @@ import numpy as np
 import pandas as pd
 import copy
 
+#inputs
 area = int(input('Enter the area : '))
 cost = int(input('Enter the money you have : '))
-
 n = int(input('Enter the number of crops you have : '))
 crops = []
 for i in range(n):
@@ -19,7 +19,6 @@ for i in range(n):
 
 #Read xls
 xls_file=pd.ExcelFile('data.xls')
-
 df = xls_file.parse('Sheet1')
 DB=df.values
 data=[]
@@ -41,7 +40,10 @@ class parameters:
         self.mutation_rate  = 0.1
         self.crossover_rate = 0.5
         self.N = 100
+
 crossover_rate = 0.5
+mutation_rate  = 0.1
+
 def is_valid(member):
     a=0
     c=0
@@ -119,7 +121,7 @@ def crossover(mating_pool):
     rand = np.random.uniform(0,1)
     parent_1 = copy.deepcopy(mating_pool[temp_1])
     parent_2 = copy.deepcopy(mating_pool[temp_2])
-    if rand > crossover_rate:    
+    if rand < crossover_rate:    
         new1,new2 = cross(parent_1,parent_2) 
         new_pop.append(new1)
         new_pop.append(new2)
@@ -130,9 +132,11 @@ def crossover(mating_pool):
 
 def mutation(population):
     n = len(population)
-    rand_parents= [np.random.randint(0,n) for i in range(10)]
-    for i in rand_parents:
-        population[i]=cover()
+    rand = np.random.uniform(0,1)
+    if rand < mutation_rate:            
+        rand_parents= [np.random.randint(0,n) for i in range(5)]
+        for i in rand_parents:
+            population[i]=cover()
     return population
 
 def GA():
@@ -143,14 +147,14 @@ def GA():
     ans=-100
     ans_Chromosome=[]
     avg_fitness_list = []
-    for i in range(1000):
+    for i in range(500):
         fitness_list=[]
         avg_fitness=0
         for j in population:
             mem_fitness = fitness(j)
             fitness_list.append(mem_fitness)
             avg_fitness = avg_fitness + mem_fitness
-        avg_fitness = avg_fitness/params.N
+        avg_fitness = avg_fitness/(params.N*100)
         avg_fitness_list.append(avg_fitness)
         print(avg_fitness)
         mating_pool = roulette_wheel_selection(avg_fitness,fitness_list,population)
@@ -158,9 +162,9 @@ def GA():
         #for i in mating_pool :
         #   print(i,"->",fitness(i))
         population=crossover(mating_pool)
-        if i%15==0:
+        if i%20==0:
             population=mutation(population)
-        if i ==99:
+        if i ==499:
             p=0
             for k in (fitness_list):
                 if k>ans:
@@ -169,6 +173,7 @@ def GA():
                 p=p+1
     return ans,ans_Chromosome,avg_fitness_list
 
+#Printing the results:-
 answer,ans_Chromosome,avg_fitness_list=GA()    
 print("Answer is : ",ans_Chromosome," with fitness ",answer,".")
 
@@ -179,7 +184,7 @@ for i in range(n):
     
 #Plot the results
 import matplotlib.pyplot as plt
-x = np.arange(0,1000,1)
+x = np.arange(0,500,1)
 y = avg_fitness_list
 plt.plot(x,y)
 plt.xlabel('Number of Generation')
