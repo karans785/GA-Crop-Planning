@@ -11,21 +11,37 @@ import copy
 area = int(input('Enter the area : '))
 cost = int(input('Enter the money you have : '))
 
-print("Crops List:-\n")
-print("1.Wheat\n2.Rice\n3.Sunflower\n")
-
 n = int(input('Enter the number of crops you have : '))
 crops = []
 for i in range(n):
-    crops.append(input("Enter crop number : "))
-    
-data=[[1000,500,10,2],[1200,300,12,3],[500,1000,20,3]] 
+    name=input("Enter crop name : ")
+    crops.append(name)
+
+#Read xls
+xls_file=pd.ExcelFile('data.xls')
+
+df = xls_file.parse('Sheet1')
+DB=df.values
+data=[]
+for i in range(0,n):
+    found=False
+    for j in range(0,len(DB)):
+        if crops[i]==DB[j][0]:
+            info = [DB[j][1],DB[j][2],DB[j][3],DB[j][4]]
+            data.append(info)
+            found=True
+    if not found:
+        print(crops[i],' not found in the DB!!')
+for i in data:
+    print(i)
+#data=[[1000,500,10,2],[1200,300,12,3],[500,1000,20,3],[4685,1000,1520,12]] 
+
 class parameters:
     def __init__(self):
         self.mutation_rate  = 0.1
         self.crossover_rate = 0.5
         self.N = 100
-    
+
 def is_valid(member):
     a=0
     c=0
@@ -34,7 +50,7 @@ def is_valid(member):
         a = a + i
         c = c + (data[j][3]*i)
         j=j+1
-    return (a==area) and (not cost<c)
+    return ((a==area) and (not cost<c))
     
 def cover():
     member = [0 for i in range(n)]
@@ -107,14 +123,16 @@ def crossover(mating_pool):
     new_pop.append(new1)
     new_pop.append(new2)
     return new_pop
+
 def GA():
     population, params = initialize()
     print('Initial population is : ')
-    ans=-100
-    ans_Chromosome=[]
     for i in population:
         print(i," -> ",fitness(i))
-    for i in range(200):
+    ans=-100
+    ans_Chromosome=[]
+    avg_fitness_list = []
+    for i in range(100):
         fitness_list=[]
         avg_fitness=0
         for j in population:
@@ -122,6 +140,7 @@ def GA():
             fitness_list.append(mem_fitness)
             avg_fitness = avg_fitness + mem_fitness
         avg_fitness = avg_fitness/params.N
+        avg_fitness_list.append(avg_fitness)
         print(avg_fitness)
         mating_pool = roulette_wheel_selection(avg_fitness,fitness_list,population)
         #print("\nMating Pool : \n")
@@ -135,7 +154,17 @@ def GA():
                     ans=k
                     ans_Chromosome=population[p]
                 p=p+1
-    return ans,ans_Chromosome
+    return ans,ans_Chromosome,avg_fitness_list
 
-answer,ans_Chromosome=GA()    
+answer,ans_Chromosome,avg_fitness_list=GA()    
 print("Answer is : ",ans_Chromosome," with fitness ",answer,".")
+
+#Plot the results
+import matplotlib.pyplot as plt
+x = np.arange(0,100,1)
+y = avg_fitness_list
+plt.plot(x,y)
+plt.xlabel('Number of Generation')
+plt.ylabel('Avg Fitness Of Population')
+plt.title('Avg fitness curve')
+plt.show()
