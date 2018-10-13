@@ -41,7 +41,7 @@ class parameters:
         self.mutation_rate  = 0.1
         self.crossover_rate = 0.5
         self.N = 100
-
+crossover_rate = 0.5
 def is_valid(member):
     a=0
     c=0
@@ -116,13 +116,24 @@ def crossover(mating_pool):
         new_pop.append(i)
     temp_1 = np.random.randint(len(mating_pool))
     temp_2 = np.random.randint(len(mating_pool))
-    
+    rand = np.random.uniform(0,1)
     parent_1 = copy.deepcopy(mating_pool[temp_1])
     parent_2 = copy.deepcopy(mating_pool[temp_2])
-    new1,new2 = cross(parent_1,parent_2) 
-    new_pop.append(new1)
-    new_pop.append(new2)
+    if rand > crossover_rate:    
+        new1,new2 = cross(parent_1,parent_2) 
+        new_pop.append(new1)
+        new_pop.append(new2)
+    else:
+        new_pop.append(parent_1)
+        new_pop.append(parent_2)
     return new_pop
+
+def mutation(population):
+    n = len(population)
+    rand_parents= [np.random.randint(0,n) for i in range(10)]
+    for i in rand_parents:
+        population[i]=cover()
+    return population
 
 def GA():
     population, params = initialize()
@@ -132,7 +143,7 @@ def GA():
     ans=-100
     ans_Chromosome=[]
     avg_fitness_list = []
-    for i in range(100):
+    for i in range(1000):
         fitness_list=[]
         avg_fitness=0
         for j in population:
@@ -147,6 +158,8 @@ def GA():
         #for i in mating_pool :
         #   print(i,"->",fitness(i))
         population=crossover(mating_pool)
+        if i%15==0:
+            population=mutation(population)
         if i ==99:
             p=0
             for k in (fitness_list):
@@ -166,7 +179,7 @@ for i in range(n):
     
 #Plot the results
 import matplotlib.pyplot as plt
-x = np.arange(0,100,1)
+x = np.arange(0,1000,1)
 y = avg_fitness_list
 plt.plot(x,y)
 plt.xlabel('Number of Generation')
