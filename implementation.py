@@ -31,17 +31,16 @@ for i in range(0,n):
             found=True
     if not found:
         print(crops[i],' not found in the DB!!')
-for i in data:
-    print(i)
+
 
 class parameters:
     def __init__(self):
-        self.mutation_rate  = 0.1
-        self.crossover_rate = 0.5
+        self.mutation_rate  = 0.2
+        self.crossover_rate = 0.8
         self.N = 100
 
 crossover_rate = 0.8
-mutation_rate  = 0.1
+mutation_rate  = 0.2
 
 def is_valid(member):
     a=0
@@ -145,7 +144,7 @@ def find_best(fitness_list):
             max_so_far = fitness_list[i]
     return max_so_far
         
-        
+iter=100     
 def GA():
     population, params = initialize()
     print('Initial population is : ')
@@ -155,7 +154,7 @@ def GA():
     ans_Chromosome=[]
     avg_fitness_list = []
     best_fitness_list =[]
-    for i in range(120):
+    for i in range(iter):
         fitness_list=[]
         avg_fitness=0
         for j in population:
@@ -170,7 +169,7 @@ def GA():
         if i%15==0:
             population=mutation(population)
         best_fitness_list.append(find_best(fitness_list))
-        if i ==119:
+        if i ==iter-1:
             p=0
             for k in (fitness_list):
                 if k>ans:
@@ -190,7 +189,7 @@ for i in range(n):
 
 #plotting the results
 import matplotlib.pyplot as plt
-x = np.arange(0,120,1)
+x = np.arange(0,iter,1)
 y = avg_fitness_list
 plt.plot(x,y)
 plt.xlabel('Number of Generation')
@@ -198,7 +197,7 @@ plt.ylabel('Avg Fitness Of Population')
 plt.title('Avg fitness curve')
 plt.show()
 
-x = np.arange(0,120,1)
+x = np.arange(0,iter,1)
 z = best_fitness_list
 plt.plot(x,z,"red")
 plt.xlabel('Number of Generation')
