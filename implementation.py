@@ -33,7 +33,6 @@ for i in range(0,n):
         print(crops[i],' not found in the DB!!')
 for i in data:
     print(i)
-#data=[[1000,500,10,2],[1200,300,12,3],[500,1000,20,3],[4685,1000,1520,12]] 
 
 class parameters:
     def __init__(self):
@@ -41,7 +40,7 @@ class parameters:
         self.crossover_rate = 0.5
         self.N = 100
 
-crossover_rate = 0.5
+crossover_rate = 0.8
 mutation_rate  = 0.1
 
 def is_valid(member):
@@ -139,55 +138,77 @@ def mutation(population):
             population[i]=cover()
     return population
 
+def find_best(fitness_list):
+    max_so_far = -1
+    for i in range(len(fitness_list)):
+        if fitness_list[i] >max_so_far:
+            max_so_far = fitness_list[i]
+    return max_so_far
+        
+        
 def GA():
     population, params = initialize()
     print('Initial population is : ')
     for i in population:
-        print(i," -> ",fitness(i))
+        print(i," with fitness ",fitness(i))
     ans=-100
     ans_Chromosome=[]
     avg_fitness_list = []
-    for i in range(500):
+    best_fitness_list =[]
+    for i in range(120):
         fitness_list=[]
         avg_fitness=0
         for j in population:
             mem_fitness = fitness(j)
             fitness_list.append(mem_fitness)
             avg_fitness = avg_fitness + mem_fitness
-        avg_fitness = avg_fitness/(params.N*100)
+        avg_fitness = avg_fitness/(params.N)
         avg_fitness_list.append(avg_fitness)
-        print(avg_fitness)
+        print("Average fitness of population in generation ",i+1," is ",avg_fitness,".")
         mating_pool = roulette_wheel_selection(avg_fitness,fitness_list,population)
-        #print("\nMating Pool : \n")
-        #for i in mating_pool :
-        #   print(i,"->",fitness(i))
         population=crossover(mating_pool)
-        if i%20==0:
+        if i%15==0:
             population=mutation(population)
-        if i ==499:
+        best_fitness_list.append(find_best(fitness_list))
+        if i ==119:
             p=0
             for k in (fitness_list):
                 if k>ans:
                     ans=k
                     ans_Chromosome=population[p]
                 p=p+1
-    return ans,ans_Chromosome,avg_fitness_list
+    return ans,ans_Chromosome,avg_fitness_list,best_fitness_list
 
 #Printing the results:-
-answer,ans_Chromosome,avg_fitness_list=GA()    
+answer,ans_Chromosome,avg_fitness_list,best_fitness_list=GA()    
 print("Answer is : ",ans_Chromosome," with fitness ",answer,".")
 
 
 print("The genetic algorithm suggests that you should plant  :- \n")
 for i in range(n):
     print(crops[i]," in ",ans_Chromosome[i]," hectares of your farm.")
-    
-#Plot the results
+
+#plotting the results
 import matplotlib.pyplot as plt
-x = np.arange(0,500,1)
+x = np.arange(0,120,1)
 y = avg_fitness_list
 plt.plot(x,y)
 plt.xlabel('Number of Generation')
 plt.ylabel('Avg Fitness Of Population')
 plt.title('Avg fitness curve')
+plt.show()
+
+x = np.arange(0,120,1)
+z = best_fitness_list
+plt.plot(x,z,"red")
+plt.xlabel('Number of Generation')
+plt.ylabel('Best Fitness Of Population')
+plt.title('Best fitness curve')
+plt.show()
+
+plt.plot(x,y,"blue",label='Avg')
+plt.plot(x,z,"red",label="Best")
+plt.xlabel('Number of Generation')
+plt.ylabel('Fitness ')
+plt.legend(loc="upper left")
 plt.show()
